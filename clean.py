@@ -179,7 +179,6 @@ df_cases = df_covid.set_index("Date")
 df_cases = df_cases.shift(freq="1D")
 # Join COVID case data into dataset
 df = df.join(df_cases, how="left", on='Date')
-df["Cases"] = df["Cases"].fillna(0)
 
 # Input data from ACS car ownership data
 # 2021 data chosen to be the same as 2020 per this source showing it's pretty level https://www.valuepenguin.com/auto-insurance/car-ownership-statistics#state-per-capita
@@ -229,6 +228,8 @@ df = df.rename(columns={
 # Reorder dataframe columns
 df = df[["Week_Start_Date", "Gas_Price", "Ratio", "TNP_Trips", "Transit_Ridership", "Bus_Rides", "Rail_Boardings",
          "Time", "Month", "Quarter", "Season", "Year", "Cases", "Lockdown", "Population", "Unemployment_Rate", "Weekly_Inc"]]
+
+df = df.fillna(0)
 
 print(df)
 # Save the dataset to CSV
