@@ -98,24 +98,6 @@ df_tnp = convert_dates(df_tnp, "Trip Start Timestamp", "/", 2, 0, 1)
 # df_transit = convert_dates(df_transit, "service_date", "-")
 df_transit["service_date"] = pd.to_datetime(df_transit["service_date"])
 
-# datelist = df_transit["service_date"].tolist()
-# years = []
-# months = []
-# days = []
-# for date in datelist:
-#     date = str(date)
-#     split = date.split("-")
-#     years.append(split[0])
-#     months.append(split[1])
-#     days.append(split[2].split(" ")[0])
-# df_transit["Year"] = years
-# df_transit["Month"] = months
-# df_transit["Day"] = days
-# df_transit["Date"] = df_transit["Month"]+"/" + \
-#     df_transit["Day"]+"/"+df_transit["Year"]
-# df_transit = df_transit.drop(columns=["service_date", "Month", "Day", "Year"])
-
-
 df_transit["Total Rides"] = df_transit["total_rides"]
 df_transit = df_transit.drop(columns=["total_rides"])
 
@@ -145,7 +127,7 @@ df = df[df["GasPrice"] > 0]
 
 # Format dataset
 df = df.rename(columns={"GasPrice": "Gas_Price", "bus": "Bus_Rides",
-               "rail_boardings": "Rail_Boardings", "Trips": "TNP_Trips", "Total Rides": "Transit_Ridership"})
+                        "rail_boardings": "Rail_Boardings", "Trips": "TNP_Trips", "Total Rides": "Transit_Ridership"})
 df = df.drop(
     columns=["day_type"])
 
@@ -169,7 +151,7 @@ df_covid = df_covid.rename(columns={
 df_covid = df_covid[df_covid["Cases"] > 0]
 df_covid["Date"] = pd.to_datetime(df_covid["Date"])
 df_covid = df_covid.drop(columns=["ZIP Code", "Week Number", "Week End", "Cases - Cumulative", "Case Rate - Weekly", "Case Rate - Cumulative", "Tests - Weekly", "Tests - Cumulative", "Test Rate - Weekly", "Test Rate - Cumulative",
-                         "Percent Tested Positive - Weekly", "Percent Tested Positive - Cumulative", "Deaths - Weekly", "Deaths - Cumulative", "Death Rate - Weekly", "Death Rate - Cumulative", "Population", "Row ID", "ZIP Code Location"])
+                                  "Percent Tested Positive - Weekly", "Percent Tested Positive - Cumulative", "Deaths - Weekly", "Deaths - Cumulative", "Death Rate - Weekly", "Death Rate - Cumulative", "Population", "Row ID", "ZIP Code Location"])
 
 # Aggregate COVID cases to be daily
 df_covid = df_covid.groupby(['Date'], as_index=False)['Cases'].sum()
