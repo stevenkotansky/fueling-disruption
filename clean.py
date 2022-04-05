@@ -5,6 +5,7 @@ import datetime
 
 pd.set_option('display.max_columns', 50)
 
+
 def in_lockdown(Date):
     if pd.to_datetime("3/26/2020") <= Date <= pd.to_datetime("5/29/2020"):
         lockdown = 1
@@ -12,6 +13,7 @@ def in_lockdown(Date):
         lockdown = 0
 
     return lockdown
+
 
 def convert_num_vehicles(Date):
     if pd.to_datetime("3/26/2020") <= Date <= pd.to_datetime("5/29/2020"):
@@ -42,16 +44,20 @@ def find_season(month):
 
     return season
 
+
 def insert_incomes(row):
-    print(row["Weekly_Inc"])
-    if row["Quarter"] == 4 & row["Year"] == 2021:
-        last_period_inc = 1438.927
-        average_pct_change = 0.0215
-        row["Weekly_Inc"] = (1+average_pct_change)*last_period_inc
-    else: 
-        row["Weekly_Inc"] = row["Weekly_Inc"]
-    input()
-    return row
+    if row["Quarter"] == 4:
+        if row["Year"] == 2021:
+            print()
+            last_period_inc = 1438.927
+            average_pct_change = 0.0215
+            income = (1+average_pct_change)*last_period_inc
+        else:
+            income = row["Weekly_Inc"]
+    else:
+        income = row["Weekly_Inc"]
+    return income
+
 
 def convert_dates(df, original_date_column_nme, delimiter, y_loc, m_loc, d_loc):
     df["Date"] = df[original_date_column_nme]
@@ -168,24 +174,27 @@ df_covid = df_covid.drop(columns=["ZIP Code", "Week Number", "Week End", "Cases 
 # Aggregate COVID cases to be daily
 df_covid = df_covid.groupby(['Date'], as_index=False)['Cases'].sum()
 
-#Shift days to allign with other datasets
+# Shift days to allign with other datasets
 df_cases = df_covid.set_index("Date")
 df_cases = df_cases.shift(freq="1D")
 # Join COVID case data into dataset
 df = df.join(df_cases, how="left", on='Date')
+df["Cases"] = df["Cases"].replace("NaN", 0)
 
 # Input data from ACS car ownership data
 # 2021 data chosen to be the same as 2020 per this source showing it's pretty level https://www.valuepenguin.com/auto-insurance/car-ownership-statistics#state-per-capita
-df_veh_own = pd.DataFrame({"Year": [2018, 2019, 2020, 2021], "No_Vehicle_Pct": [26.9, 27.8, 26.8, 26.8]})
+df_veh_own = pd.DataFrame(
+    {"Year": [2018, 2019, 2020, 2021], "No_Vehicle_Pct": [26.9, 27.8, 26.8, 26.8]})
 # Join vehicle ownership data into dataset
-df = df.merge(df_veh_own, how = 'left', on='Year')
+df = df.merge(df_veh_own, how='left', on='Year')
 
 # Input FRED Chicago population data
-df_population = pd.DataFrame({"Year": [2018, 2019, 2020, 2021], "Population": [9513947, 9485403, 9454282, 9601605]})
+df_population = pd.DataFrame({"Year": [2018, 2019, 2020, 2021], "Population": [
+                             9513947, 9485403, 9454282, 9601605]})
 # Join vehicle ownership data into dataset
-df = df.merge(df_population, how = 'left', on='Year')
+df = df.merge(df_population, how='left', on='Year')
 
-#Connect to unemployment dataset
+# Connect to unemployment dataset
 df_emp = pd.read_excel("FREDData.xls", sheet_name="Unemployment")
 df_emp = df_emp.rename(columns={
     "observation_date": "Date", "CHIC917URN": "Unemployment_Rate"})
@@ -193,10 +202,11 @@ df_emp["Date"] = pd.to_datetime(df_emp["Date"])
 df_emp["Month"] = df_emp["Date"].dt.month
 df_emp["Year"] = df_emp["Date"].dt.year
 
-#Join unemployment data into larger dataframe
-df = df.merge(df_emp, how="left", on=["Month", "Year"])
+# Join unemployment data into larger dataframe
+df = df.merge(df_emp, how="left", on=[
+              "Month", "Year"], suffixes=('_left', '_right'))
 
-#Connect to income dataset
+# Connect to income dataset
 df_inc = pd.read_excel("FREDData.xls", sheet_name="Income")
 df_inc = df_inc.rename(columns={
     "observation_date": "Date", "ENUC169840510SA": "Weekly_Inc"})
@@ -204,17 +214,21 @@ df_inc["Date"] = pd.to_datetime(df_inc["Date"])
 df_inc["Quarter"] = df_inc["Date"].dt.quarter
 df_inc["Year"] = df_inc["Date"].dt.year
 
-#Join income data into larger dataframe
+# Join income data into larger dataframe
 df = df.merge(df_inc, how="left", on=["Quarter", "Year"])
 
-#Fill in missing weekly income data with average quarterly change in weekly incomes
+# Fill in missing weekly income data with average quarterly change in weekly incomes
 df["Weekly_Inc"] = df.apply(lambda x: insert_incomes(x), axis=1)
 
-#Formatting
+# Formatting
 df = df.drop(
-    columns=["Date_y"])
+    columns=["Date_right", "Date"])
 df = df.rename(columns={
-    "Date_x": "Date"})
+    "Date_left": "Week_Start_Date"})
+
+# Reorder dataframe columns
+df = df[["Week_Start_Date", "Gas_Price", "Ratio", "TNP_Trips", "Transit_Ridership", "Bus_Rides", "Rail_Boardings",
+         "Time", "Month", "Quarter", "Season", "Year", "Cases", "Lockdown", "Population", "Unemployment_Rate", "Weekly_Inc"]]
 
 print(df)
 # Save the dataset to CSV
