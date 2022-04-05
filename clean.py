@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 import datetime
 
+pd.set_option('display.max_columns', 50)
 
 def in_lockdown(Date):
     if pd.to_datetime("3/26/2020") <= Date <= pd.to_datetime("5/29/2020"):
@@ -41,6 +42,16 @@ def find_season(month):
 
     return season
 
+def insert_incomes(row):
+    print(row["Weekly_Inc"])
+    if row["Quarter"] == 4 & row["Year"] == 2021:
+        last_period_inc = 1438.927
+        average_pct_change = 0.0215
+        row["Weekly_Inc"] = (1+average_pct_change)*last_period_inc
+    else: 
+        row["Weekly_Inc"] = row["Weekly_Inc"]
+    input()
+    return row
 
 def convert_dates(df, original_date_column_nme, delimiter, y_loc, m_loc, d_loc):
     df["Date"] = df[original_date_column_nme]
@@ -139,6 +150,7 @@ df["Ratio"] = df["Transit_Ridership"]/df["TNP_Trips"]
 df["Date"] = pd.to_datetime(df["Date"])
 df["Month"] = df["Date"].dt.month
 df["Year"] = df["Date"].dt.year
+df["Quarter"] = df["Date"].dt.quarter
 df["Time"] = df["Date"].apply(
     lambda x: ((abs(pd.to_datetime("2018-11-05")-x).days)/7))
 df["Season"] = df["Month"].apply(lambda x: find_season(x))
@@ -173,6 +185,36 @@ df_population = pd.DataFrame({"Year": [2018, 2019, 2020, 2021], "Population": [9
 # Join vehicle ownership data into dataset
 df = df.merge(df_population, how = 'left', on='Year')
 
+#Connect to unemployment dataset
+df_emp = pd.read_excel("FREDData.xls", sheet_name="Unemployment")
+df_emp = df_emp.rename(columns={
+    "observation_date": "Date", "CHIC917URN": "Unemployment_Rate"})
+df_emp["Date"] = pd.to_datetime(df_emp["Date"])
+df_emp["Month"] = df_emp["Date"].dt.month
+df_emp["Year"] = df_emp["Date"].dt.year
+
+#Join unemployment data into larger dataframe
+df = df.merge(df_emp, how="left", on=["Month", "Year"])
+
+#Connect to income dataset
+df_inc = pd.read_excel("FREDData.xls", sheet_name="Income")
+df_inc = df_inc.rename(columns={
+    "observation_date": "Date", "ENUC169840510SA": "Weekly_Inc"})
+df_inc["Date"] = pd.to_datetime(df_inc["Date"])
+df_inc["Quarter"] = df_inc["Date"].dt.quarter
+df_inc["Year"] = df_inc["Date"].dt.year
+
+#Join income data into larger dataframe
+df = df.merge(df_inc, how="left", on=["Quarter", "Year"])
+
+#Fill in missing weekly income data with average quarterly change in weekly incomes
+df["Weekly_Inc"] = df.apply(lambda x: insert_incomes(x), axis=1)
+
+#Formatting
+df = df.drop(
+    columns=["Date_y"])
+df = df.rename(columns={
+    "Date_x": "Date"})
 
 print(df)
 # Save the dataset to CSV
