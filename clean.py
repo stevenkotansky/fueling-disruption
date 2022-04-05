@@ -226,14 +226,39 @@ df = df.rename(columns={
     "Date_left": "Week_Start_Date"})
 
 # Reorder dataframe columns
-df = df[["Week_Start_Date", "Gas_Price", "Ratio", "TNP_Trips", "Transit_Ridership", "Bus_Rides", "Rail_Boardings",
+df = df[["Week_Start_Date", "Ratio", "Gas_Price", "TNP_Trips", "Transit_Ridership", "Bus_Rides", "Rail_Boardings",
          "Time", "Month", "Quarter", "Season", "Year", "Cases", "Lockdown", "Population", "Unemployment_Rate", "Weekly_Inc"]]
 
 df = df.fillna(0)
 
-print(df)
 # Save the dataset to CSV
 try:
     df.to_csv("CapstoneData.csv", index=False)
+except PermissionError:
+    print("Please close the CSV file.")
+
+
+# Create second dataset for modelling purposes
+df2 = df
+# Create natural log versions of variables for regression models
+
+# Regressions 1-5 use the log of the ratio for a % interpretation
+df2['ln_Ratio'] = np.log(df2['Ratio'])
+# Regression 1 uses the nominal gas price ($USD)
+# Regressions 2-5 use the logged versions of the various transit measures
+df2['ln_TNP_Trips'] = np.log(df2['TNP_Trips'])
+df2['ln_Transit_Ridership'] = np.log(df2['Transit_Ridership'])
+df2['ln_Bus_Rides'] = np.log(df2['Bus_Rides'])
+df2['ln_Rail_Boardings'] = np.log(df2['Rail_Boardings'])
+
+# Generate dummy columns for categorical variables
+df2 = pd.get_dummies(
+    df2, columns=['Month', 'Quarter', 'Season', 'Year'], drop_first=True)
+
+print(df2)
+
+# Save the dataset to CSV
+try:
+    df2.to_csv("ModelCapstoneData.csv", index=False)
 except PermissionError:
     print("Please close the CSV file.")
