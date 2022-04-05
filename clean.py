@@ -253,7 +253,7 @@ df2['ln_Rail_Boardings'] = np.log(df2['Rail_Boardings'])
 
 # Generate dummy columns for categorical variables
 df2 = pd.get_dummies(
-    df2, columns=['Month', 'Quarter', 'Season', 'Year'], drop_first=True)
+    df2, columns=['Month', 'Season', 'Year'], drop_first=True)
 
 print(df2)
 
