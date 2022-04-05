@@ -179,7 +179,7 @@ df_cases = df_covid.set_index("Date")
 df_cases = df_cases.shift(freq="1D")
 # Join COVID case data into dataset
 df = df.join(df_cases, how="left", on='Date')
-df["Cases"] = df["Cases"].replace("NaN", 0)
+df["Cases"] = df["Cases"].fillna(0)
 
 # Input data from ACS car ownership data
 # 2021 data chosen to be the same as 2020 per this source showing it's pretty level https://www.valuepenguin.com/auto-insurance/car-ownership-statistics#state-per-capita
