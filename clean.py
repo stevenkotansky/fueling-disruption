@@ -50,7 +50,7 @@ def insert_incomes(row):
         if row["Year"] == 2021:
             print()
             last_period_inc = 1438.927
-            average_pct_change = 0.0215
+            average_pct_change = 0.00951
             income = (1+average_pct_change)*last_period_inc
         else:
             income = row["Weekly_Inc"]
@@ -172,7 +172,7 @@ df = df.merge(df_veh_own, how='left', on='Year')
 # Input FRED Chicago population data
 df_population = pd.DataFrame({"Year": [2018, 2019, 2020, 2021], "Population": [
                              9513947, 9485403, 9454282, 9601605]})
-# Join vehicle ownership data into dataset
+# Join population data into dataset
 df = df.merge(df_population, how='left', on='Year')
 
 # Connect to unemployment dataset
@@ -209,7 +209,7 @@ df = df.rename(columns={
 
 # Reorder dataframe columns
 df = df[["Week_Start_Date", "Ratio", "Gas_Price", "TNP_Trips", "Transit_Ridership", "Bus_Rides", "Rail_Boardings",
-         "Time", "Month", "Quarter", "Season", "Year", "Cases", "Lockdown", "Population", "Unemployment_Rate", "Weekly_Inc"]]
+         "Time", "Month", "Quarter", "Season", "Year", "Cases", "Lockdown", "Population", "Unemployment_Rate", "No_Vehicle_Pct", "Weekly_Inc"]]
 
 df = df.fillna(0)
 
@@ -244,3 +244,5 @@ try:
     df2.to_csv("ModelCapstoneData.csv", index=False)
 except PermissionError:
     print("Please close the CSV file.")
+
+print(df2.describe(include="all"))
