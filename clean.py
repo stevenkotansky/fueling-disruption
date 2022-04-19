@@ -59,6 +59,14 @@ def insert_incomes(row):
     return income
 
 
+def get_winter(x):
+    if x == 1:
+        winter = 1
+    else:
+        winter = 0
+    return winter
+
+
 def convert_dates(df, original_date_column_nme, delimiter, y_loc, m_loc, d_loc):
     df["Date"] = df[original_date_column_nme]
     datelist = df["Date"].tolist()
@@ -241,9 +249,10 @@ df2 = pd.get_dummies(
 df2["Month"] = df["Month"]
 df2["Season"] = df["Season"]
 df2["Year"] = df["Year"]
-
+df2["Winter"] = df2["Season"].apply(lambda x: get_winter(x))
 # Rename dummy variables for interpretation
-df2 = df2.rename(columns={"Month_2": "February", "Month_3": "March", "Month_4": "April", "Month_5": "May", "Month_6": "June", "Month_7": "July", "Month_8": "August", "Month_9": "September", "Month_10": "October", "Month_11": "November", "Month_12": "December", "Season_2": "Spring", "Season_3": "Summer", "Season_4": "Fall"})
+df2 = df2.rename(columns={"Month_2": "February", "Month_3": "March", "Month_4": "April", "Month_5": "May", "Month_6": "June", "Month_7": "July", "Month_8": "August",
+                          "Month_9": "September", "Month_10": "October", "Month_11": "November", "Month_12": "December", "Season_2": "Spring", "Season_3": "Summer", "Season_4": "Fall"})
 
 # Save the dataset to CSV
 try:
