@@ -237,7 +237,8 @@ df2['ln_Rail_Boardings'] = np.log(df2['Rail_Boardings'])
 df2 = pd.get_dummies(
     df2, columns=['Month', 'Season', 'Year'], drop_first=True)
 
-print(df2)
+# Rename dummy variables for interpretation
+df2 = df2.rename(columns={"Month_2": "February", "Month_3": "March", "Month_4": "April", "Month_5": "May", "Month_6": "June", "Month_7": "July", "Month_8": "August", "Month_9": "September", "Month_10": "October", "Month_11": "November", "Month_12": "December", "Season_2": "Spring", "Season_3": "Summer", "Season_4": "Fall"})
 
 # Save the dataset to CSV
 try:
